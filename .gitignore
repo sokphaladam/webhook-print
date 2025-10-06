@@ -1,0 +1,63 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# Output directories
+dist/
+build/
+out/
+coverage/
+lib/
+.tmp/
+temp/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+*.log.*
+lerna-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests
+coverage/
+jest-test-results.json
+
+# PM2 logs
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional cache files
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Prisma / Database
+prisma/*.db
+prisma/*.sqlite
+prisma/migrations/*/steps.json
+
+# Docker
+docker-data/
