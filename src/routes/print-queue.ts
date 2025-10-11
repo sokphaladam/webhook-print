@@ -1,5 +1,6 @@
 import { Router } from "express";
 import getKnex from "../database/connection";
+import dayjs from "dayjs";
 
 const router = Router();
 
@@ -21,35 +22,38 @@ router.get("/", async (req, res) => {
     return res.status(401).json({ status: "error", message: "Unauthorized" });
   }
   const db = await getKnex();
-  const items = await db
-    .table("order_items")
-    .innerJoin("orders", "order_items.order_id", "orders.id")
-    .innerJoin("users", "order_items.created_by", "users.id")
-    .innerJoin("delivery", "delivery.id", "orders.delivery_id")
+  const items = await db("order_items")
+    .select(
+      "orders.id as orderId",
+      "order_items.id",
+      "products.code",
+      "products.title as title", //
+      "orders.set", //
+      "delivery.name as delivery", //
+      "orders.delivery_code", //
+      "order_items.created_at as date", //
+      "product_sku.name as sku", //
+      "order_items.qty as qty", //
+      "order_items.addons", //
+      "remark", //
+      "users.display_name as order_by" //
+    )
+    .innerJoin("orders", "orders.id", "order_items.order_id")
     .innerJoin("products", "products.id", "order_items.product_id")
     .innerJoin("product_sku", "product_sku.id", "order_items.sku_id")
-    .where({ is_print: 0, "order_items.status": "1" })
-    .whereNot({ "orders.status": "4" })
+    .leftJoin("delivery", "delivery.id", "orders.delivery_id")
+    .leftJoin("users", "users.id", "order_items.created_by")
+    .where("order_items.is_print", false)
+    .andWhere("orders.status", "=", "1")
     .limit(5)
-    .select([
-      "order_items.id",
-      "order_items.qty",
-      "orders.set",
-      "order_items.created_at as created_at",
-      "users.display_name as created_by",
-      "delivery.name as delivery_name",
-      "orders.delivery_code",
-      "products.title",
-      "product_sku.name as sku_name",
-      "order_items.addons",
-      "order_items.remark",
-    ]);
+    .offset(0);
 
   const result: table_print_queue[] = items.map((x) => {
+    const date = dayjs(new Date(x.date)).format("YYYY-MM-DD HH:mm:ss");
     const contentToPrint: Record<string, unknown>[] = [
       {
         type: "text",
-        value: `តុលេខ: ${x.set}`,
+        value: `តុលេខ: ${x.set > 50 ? "D" + x.set : x.set}`,
         style: {
           fontSize: "20px",
           fontWeight: "bold",
@@ -58,7 +62,7 @@ router.get("/", async (req, res) => {
       },
       {
         type: "text",
-        value: `កាលបរិច្ឆេទ: ${x.created_at}`,
+        value: `កាលបរិច្ឆេទ: ${date}`,
         style: {
           fontSize: "18px",
           fontWeight: "bold",
@@ -67,7 +71,7 @@ router.get("/", async (req, res) => {
       },
       {
         type: "text",
-        value: `បញ្ជាទិញដោយ: ${x.created_by}`,
+        value: `បញ្ជាទិញដោយ: ${x.order_by}`,
         style: {
           fontSize: "18px",
           fontWeight: "bold",
@@ -76,10 +80,10 @@ router.get("/", async (req, res) => {
       },
     ];
 
-    if (x.delivery_name) {
+    if (x.delivery) {
       contentToPrint.push({
         type: "text",
-        value: `ប្រភេទ: វេចខ្ចប់ (${x.delivery_name}-${x.delivery_code}) `,
+        value: `ប្រភេទ: វេចខ្ចប់ (${x.delivery}-${x.delivery_code}) `,
         style: {
           fontSize: "18px",
           fontWeight: "bold",
@@ -107,7 +111,7 @@ router.get("/", async (req, res) => {
       },
       {
         type: "text",
-        value: `ទំនិញ:   ${x.title} (${x.sku_name})`,
+        value: `ទំនិញ:   ${x.title} (${x.sku})`,
         style: {
           fontSize: "18px",
           fontWeight: "bold",
@@ -134,7 +138,7 @@ router.get("/", async (req, res) => {
     if (x.remark) {
       contentToPrint.push({
         type: "text",
-        value: `   + ${x.remarks}`,
+        value: `   + ${x.remark}`,
         style: {
           fontSize: "18px",
           fontWeight: "bold",
@@ -162,6 +166,28 @@ router.get("/", async (req, res) => {
       fontsize: 12,
     });
 
+    let printer = "BIXOLON SRP-F310II(#1)";
+
+    // if (x.code.substring(0, 2) === "SD") {
+    //   console.log("Print to SD " + x.id);
+    //   printer = "tcp://10.100.10.101:9100";
+    // } else if (x.code.substring(0, 2) === "BL") {
+    //   console.log("Print to BL" + x.id);
+    //   printer = "tcp://10.100.10.104:9100";
+    // } else if (x.code.substring(0, 2) === "GR") {
+    //   console.log("Print to GR" + x.id);
+    //   printer = "tcp://10.100.10.103:9100";
+    // } else if (x.code.substring(0, 2) === "FR") {
+    //   console.log("Print to FR" + x.id);
+    //   printer = "tcp://10.100.10.102:9100";
+    // } else if (x.code.substring(0, 2) === "FT") {
+    //   console.log("print to FT" + x.id);
+    //   printer = "tcp://10.100.10.105:9100";
+    // } else if (x.code.substring(0, 2) === "SN") {
+    //   console.log("print to FT" + x.id);
+    //   printer = "tcp://10.100.10.106:9100";
+    // }
+
     return {
       id: x.id,
       created_at: x.created_at,
@@ -169,11 +195,23 @@ router.get("/", async (req, res) => {
       content: contentToPrint,
       printer_info: {
         name: "",
-        printer_name: "",
+        printer_name: printer,
       },
     };
   });
   res.json({ result });
+});
+
+router.delete("/delete", async (req, res) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ status: "error", message: "Unauthorized" });
+  }
+
+  const db = await getKnex();
+  const ids: number[] = req.body.ids;
+
+  await db("order_items").whereIn("id", ids).update({ is_print: true });
+  res.json({ status: "ok", message: "Deleted successfully" });
 });
 
 export default router;

@@ -16,10 +16,12 @@ router.post("/auth/login", async (req, res) => {
       res.json({
         token: items.token,
       });
+    } else {
+      res.status(401).json({ status: "error", message: "Invalid password" });
     }
+  } else {
+    res.status(401).json({ status: "error", message: "User not found" });
   }
-
-  res.json(items);
 });
 
 export default router;
