@@ -168,25 +168,25 @@ router.get("/", async (req, res) => {
 
     let printer = "BIXOLON SRP-F310II(#1)";
 
-    // if (x.code.substring(0, 2) === "SD") {
-    //   console.log("Print to SD " + x.id);
-    //   printer = "tcp://10.100.10.101:9100";
-    // } else if (x.code.substring(0, 2) === "BL") {
-    //   console.log("Print to BL" + x.id);
-    //   printer = "tcp://10.100.10.104:9100";
-    // } else if (x.code.substring(0, 2) === "GR") {
-    //   console.log("Print to GR" + x.id);
-    //   printer = "tcp://10.100.10.103:9100";
-    // } else if (x.code.substring(0, 2) === "FR") {
-    //   console.log("Print to FR" + x.id);
-    //   printer = "tcp://10.100.10.102:9100";
-    // } else if (x.code.substring(0, 2) === "FT") {
-    //   console.log("print to FT" + x.id);
-    //   printer = "tcp://10.100.10.105:9100";
-    // } else if (x.code.substring(0, 2) === "SN") {
-    //   console.log("print to FT" + x.id);
-    //   printer = "tcp://10.100.10.106:9100";
-    // }
+    if (x.code.substring(0, 2) === "SD") {
+      console.log("Print to SD " + x.id);
+      printer = "tcp://10.100.10.101:9100";
+    } else if (x.code.substring(0, 2) === "BL") {
+      console.log("Print to BL" + x.id);
+      printer = "tcp://10.100.10.104:9100";
+    } else if (x.code.substring(0, 2) === "GR") {
+      console.log("Print to GR" + x.id);
+      printer = "tcp://10.100.10.103:9100";
+    } else if (x.code.substring(0, 2) === "FR") {
+      console.log("Print to FR" + x.id);
+      printer = "tcp://10.100.10.102:9100";
+    } else if (x.code.substring(0, 2) === "FT") {
+      console.log("print to FT" + x.id);
+      printer = "tcp://10.100.10.105:9100";
+    } else if (x.code.substring(0, 2) === "SN") {
+      console.log("print to FT" + x.id);
+      printer = "tcp://10.100.10.106:9100";
+    }
 
     return {
       id: x.id,
