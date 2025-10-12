@@ -1,6 +1,6 @@
+import dayjs from "dayjs";
 import { Router } from "express";
 import getKnex from "../database/connection";
-import dayjs from "dayjs";
 
 const router = Router();
 
@@ -166,26 +166,26 @@ router.get("/", async (req, res) => {
       fontsize: 12,
     });
 
-    let printer = "BIXOLON SRP-F310II(#1)";
+    let printer = "Print to Chasier";
 
     if (x.code.substring(0, 2) === "SD") {
       console.log("Print to SD " + x.id);
-      printer = "tcp://10.100.10.101:9100";
+      printer = "Print to Chasier";
     } else if (x.code.substring(0, 2) === "BL") {
       console.log("Print to BL" + x.id);
-      printer = "tcp://10.100.10.104:9100";
+      printer = "Printe to BL";
     } else if (x.code.substring(0, 2) === "GR") {
       console.log("Print to GR" + x.id);
-      printer = "tcp://10.100.10.103:9100";
+      printer = "Print to GR_";
     } else if (x.code.substring(0, 2) === "FR") {
       console.log("Print to FR" + x.id);
-      printer = "tcp://10.100.10.102:9100";
+      printer = "Print to FR_";
     } else if (x.code.substring(0, 2) === "FT") {
       console.log("print to FT" + x.id);
-      printer = "tcp://10.100.10.105:9100";
+      printer = "Print to FT";
     } else if (x.code.substring(0, 2) === "SN") {
       console.log("print to FT" + x.id);
-      printer = "tcp://10.100.10.106:9100";
+      printer = "Print to SN";
     }
 
     return {
