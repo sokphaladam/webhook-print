@@ -45,6 +45,7 @@ router.get("/", async (req, res) => {
     .leftJoin("users", "users.id", "order_items.created_by")
     .where("order_items.is_print", false)
     .andWhere("orders.status", "=", "1")
+    .orderBy("order_items.id", "asc")
     .limit(5)
     .offset(0);
 
