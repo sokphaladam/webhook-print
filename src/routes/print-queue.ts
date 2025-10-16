@@ -31,7 +31,7 @@ router.get("/", async (req, res) => {
       "orders.set", //
       "delivery.name as delivery", //
       "orders.delivery_code", //
-      "order_items.created_at as date", //
+      "order_items.printed_at as date", //
       "product_sku.name as sku", //
       "order_items.qty as qty", //
       "order_items.addons", //
@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
     .leftJoin("users", "users.id", "order_items.created_by")
     .where("order_items.is_print", false)
     .andWhere("orders.status", "=", "1")
-    .orderBy("order_items.id", "asc")
+    .orderBy("order_items.printed_at", "asc")
     .limit(5)
     .offset(0);
 
