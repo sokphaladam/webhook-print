@@ -174,26 +174,26 @@ router.get("/", async (req, res) => {
       fontsize: 12,
     });
 
-    let printer = "Print to Chasier";
+    let printer = "TCP://10.100.10.101:9100";
 
     if (x.code.substring(0, 2) === "SD") {
       console.log("Print to SD " + x.id);
-      printer = "Print to Chasier";
+      printer = "TCP://10.100.10.101:9100";
     } else if (x.code.substring(0, 2) === "BL") {
       console.log("Print to BL" + x.id);
-      printer = "Printe to BL";
+      printer = "TCP://10.100.10.104:9100";
     } else if (x.code.substring(0, 2) === "GR") {
       console.log("Print to GR" + x.id);
-      printer = "Print to GR_";
+      printer = "TCP://10.100.10.103:9100";
     } else if (x.code.substring(0, 2) === "FR") {
       console.log("Print to FR" + x.id);
-      printer = "Print to FR_";
+      printer = "TCP://10.100.10.102:9100";
     } else if (x.code.substring(0, 2) === "FT") {
       console.log("print to FT" + x.id);
-      printer = "Print to FT";
+      printer = "TCP://10.100.10.105:9100";
     } else if (x.code.substring(0, 2) === "SN") {
       console.log("print to FT" + x.id);
-      printer = "Print to SN";
+      printer = "TCP://10.100.10.106:9100";
     }
 
     return {
