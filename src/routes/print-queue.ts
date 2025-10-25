@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
     return res.status(401).json({ status: "error", message: "Unauthorized" });
   }
   const db = await getKnex();
-  const items = await db("order_items")
+  const query = db("order_items")
     .select(
       "orders.id as orderId",
       "order_items.id",
@@ -48,6 +48,13 @@ router.get("/", async (req, res) => {
     .orderBy("order_items.printed_at", "asc")
     .limit(5)
     .offset(0);
+
+  if (req.query.keyword) {
+    console.log("Filter by keyword: " + req.query.keyword);
+    query.andWhereRaw("LEFT(products.code, 2) = ?", [req.query.keyword]);
+  }
+
+  const items = await query.select();
 
   const result: table_print_queue[] = items.map((x) => {
     const date = dayjs(new Date(x.date)).format("YYYY-MM-DD HH:mm:ss");
