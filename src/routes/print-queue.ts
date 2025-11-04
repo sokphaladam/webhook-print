@@ -36,7 +36,9 @@ router.get("/", async (req, res) => {
       "order_items.qty as qty", //
       "order_items.addons", //
       "remark", //
-      "users.display_name as order_by" //
+      "users.display_name as order_by", //
+      "order_items.print_time",
+      "order_items.printed_by"
     )
     .innerJoin("orders", "orders.id", "order_items.order_id")
     .innerJoin("products", "products.id", "order_items.product_id")
@@ -56,8 +58,16 @@ router.get("/", async (req, res) => {
 
   const items = await query.select();
 
+  const allUserPrints = await db("users")
+    .whereIn(
+      "id",
+      items.map((x) => x.printed_by)
+    )
+    .select("id", "display_name");
+
   const result: table_print_queue[] = items.map((x) => {
     const date = dayjs(new Date(x.date)).format("YYYY-MM-DD HH:mm:ss");
+    const userPrint = allUserPrints.find((f) => f.id === x.printed_by);
     const contentToPrint: Record<string, unknown>[] = [
       {
         type: "text",
@@ -161,6 +171,28 @@ router.get("/", async (req, res) => {
         fontFamily: `Hanuman, 'Courier New', Courier, monospace`,
       },
     });
+    if (userPrint && Number(x.print_time) > 1) {
+      contentToPrint.push({
+        type: "text",
+        value: `Print-ចុងក្រោយដោយ:   ${userPrint.display_name} (ជាលើកទី: ${x.print_time})`,
+        style: {
+          fontSize: "18px",
+          fontWeight: "bold",
+          fontFamily: `Hanuman, 'Courier New', Courier, monospace`,
+          whiteSpace: "pre-wrap",
+          width: "257px",
+          display: "block",
+          wordBreak: "break-word",
+        },
+      });
+      contentToPrint.push({
+        type: "text",
+        value: "--------------------------------",
+        style: {
+          fontFamily: `Hanuman, 'Courier New', Courier, monospace`,
+        },
+      });
+    }
     contentToPrint.push({
       type: "qrCode",
       value: `${x.id}`,
