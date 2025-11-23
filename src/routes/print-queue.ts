@@ -2,6 +2,12 @@ import dayjs from "dayjs";
 import { Router } from "express";
 import getKnex from "../database/connection";
 
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const router = Router();
 
 interface table_print_queue {
@@ -65,8 +71,10 @@ router.get("/", async (req, res) => {
     )
     .select("id", "display_name");
 
+  const allTables = await db("table_set").select("set", "floor");
+
   const result: table_print_queue[] = items.map((x) => {
-    const date = dayjs(new Date(x.date)).format("YYYY-MM-DD HH:mm:ss");
+    const date = dayjs(new Date(x.date)).format("YYYY-MM-DD hh:mm:ss a");
     const userPrint = allUserPrints.find((f) => f.id === x.printed_by);
     const contentToPrint: Record<string, unknown>[] = [
       {
@@ -206,26 +214,49 @@ router.get("/", async (req, res) => {
       fontsize: 12,
     });
 
-    let printer = "Print to Chasier";
+    const findTable = allTables.find((f) => String(f.set) === String(x.set));
+
+    let printer =
+      findTable && findTable.floor !== "Ground Floor"
+        ? `Print to Chasier ${findTable.floor}`
+        : "Print to Chasier";
 
     if (x.code.substring(0, 2) === "SD") {
       console.log("Print to SD " + x.id);
-      printer = "Print to Chasier";
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to Chasier ${findTable.floor}`
+          : "Print to Chasier";
     } else if (x.code.substring(0, 2) === "BL") {
       console.log("Print to BL" + x.id);
-      printer = "Printe to BL";
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to BL ${findTable.floor}`
+          : "Print to BL";
     } else if (x.code.substring(0, 2) === "GR") {
       console.log("Print to GR" + x.id);
-      printer = "Print to GR_";
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to GR ${findTable.floor}`
+          : "Print to GR";
     } else if (x.code.substring(0, 2) === "FR") {
       console.log("Print to FR" + x.id);
-      printer = "Print to FR_";
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to FR ${findTable.floor}`
+          : "Print to FR";
     } else if (x.code.substring(0, 2) === "FT") {
       console.log("print to FT" + x.id);
-      printer = "Print to FT";
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to FT ${findTable.floor}`
+          : "Print to FT";
     } else if (x.code.substring(0, 2) === "SN") {
-      console.log("print to FT" + x.id);
-      printer = "Print to SN";
+      console.log("print to SN" + x.id);
+      printer =
+        findTable && findTable.floor !== "Ground Floor"
+          ? `Print to SN ${findTable.floor}`
+          : "Print to SN";
     }
 
     return {
@@ -250,7 +281,14 @@ router.delete("/delete", async (req, res) => {
   const db = await getKnex();
   const ids: number[] = req.body.ids;
 
-  await db("order_items").whereIn("id", ids).update({ is_print: true });
+  await db("order_items")
+    .whereIn("id", ids)
+    .update({
+      is_print: true,
+      print_success_date: dayjs()
+        .tz("Asia/Bangkok")
+        .format("YYYY-MM-DD HH:mm:ss"),
+    });
   res.json({ status: "ok", message: "Deleted successfully" });
 });
 
