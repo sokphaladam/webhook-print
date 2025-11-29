@@ -10,7 +10,6 @@ WORKDIR /usr/src/app
 
 # where available (npm@5+)
 # COPY pnpm-lock.yaml .
-COPY package-lock.json .
 COPY package.json .
 
 # RUN npm install -g pnpm
