@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PORT: $PORT # Change to your real port
+        DB_MAIN: $DATABASE_URL # Your DB URL here
+    environment:
+      PORT: $PORT # Should match build args
+      DB_MAIN: $DATABASE_URL # Your DB URL here
+    ports:
+      - "$PORT:$PORT" # host:container
+    restart: always
+    command: ["npm", "run", "start"]
